@@ -6,15 +6,14 @@ using Unity.Services.Relay.Models;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
 using System.Threading.Tasks;
+using UnityEngine.SceneManagement;
+using System;
+using TMPro;
 
 public class NetworkManagerHUD : MonoBehaviour
 {
+    public TextMeshProUGUI joinCodeText;
     private string joinCode = "";  // Holds the relay join code for clients to enter
-
-    private async void Start()
-    {
-        await InitializeUnityServices();
-    }
 
     private async Task InitializeUnityServices()
     {
@@ -30,13 +29,14 @@ public class NetworkManagerHUD : MonoBehaviour
         }
     }
 
-    private async void StartHost()
+    public async void StartHost()
     {
+        await InitializeUnityServices();
         try
         {
             Allocation allocation = await RelayService.Instance.CreateAllocationAsync(4);  // Up to 4 players
             joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
-            Debug.Log($"Relay Join Code: {joinCode}");
+            joinCodeText.SetText("Join Code: " + joinCode);
 
             // Set relay data
             UnityTransport transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
@@ -56,8 +56,11 @@ public class NetworkManagerHUD : MonoBehaviour
         }
     }
 
-    private async void StartClient()
+    public async void StartClient(String code)
     {
+        joinCode = code;
+        joinCodeText.SetText("Join Code: " + joinCode);
+        await InitializeUnityServices();
         try
         {
             JoinAllocation joinAllocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
@@ -80,33 +83,4 @@ public class NetworkManagerHUD : MonoBehaviour
         }
     }
 
-    private void OnGUI()
-    {
-        GUILayout.BeginArea(new Rect(10, 10, 300, 200));
-
-        if (!NetworkManager.Singleton.IsClient && !NetworkManager.Singleton.IsServer)
-        {
-            if (GUILayout.Button("Host Game (Relay)"))
-            {
-                StartHost();
-            }
-
-            joinCode = GUILayout.TextField(joinCode, GUILayout.Width(200));
-
-            if (GUILayout.Button("Join Game (Relay)"))
-            {
-                StartClient();
-            }
-        }
-        else
-        {
-            if (GUILayout.Button("Disconnect"))
-            {
-                NetworkManager.Singleton.Shutdown();
-            }
-        }
-
-        GUILayout.Label($"Join Code: {joinCode}");
-        GUILayout.EndArea();
-    }
 }

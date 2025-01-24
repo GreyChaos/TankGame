@@ -130,13 +130,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  speed: 5
-  rotationSpeed: 100
+  speed: 3
+  rotationSpeed: 130
   animator: {fileID: 1679186533697406455}
   shell: {fileID: 2903629423322623434, guid: c8f6d29c95580c846a97263fa515653b, type: 3}
   collisionLayer:
     serializedVersion: 2
     m_Bits: 8
+  playerColor:
+    m_InternalValue: {r: 0, g: 0, b: 0, a: 0}
 --- !u!95 &1679186533697406455
 Animator:
   serializedVersion: 7
