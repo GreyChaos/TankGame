@@ -1,22 +1,19 @@
-using Unity.Netcode;
+using UnityEngine;
 using Unity.Services.Core;
 using Unity.Services.Authentication;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
-using Unity.Netcode.Transports.UTP;
-using UnityEngine;
+using Unity.Netcode;
 using System.Threading.Tasks;
 
-public class NetworkManagerHUD : MonoBehaviour
+public class RelayManager : MonoBehaviour
 {
-    private string joinCode = "";  // Holds the relay join code for clients to enter
-
     private async void Start()
     {
         await InitializeUnityServices();
     }
 
-    private async Task InitializeUnityServices()
+    async Task InitializeUnityServices()
     {
         if (UnityServices.State == ServicesInitializationState.Initialized)
             return;
@@ -26,21 +23,21 @@ public class NetworkManagerHUD : MonoBehaviour
         if (!AuthenticationService.Instance.IsSignedIn)
         {
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
-            Debug.Log("Signed in anonymously to Unity services");
+            Debug.Log("Signed in anonymously");
         }
     }
 
-    private async void StartHost()
+    public async void CreateRelay()
     {
         try
         {
-            Allocation allocation = await RelayService.Instance.CreateAllocationAsync(4);  // Up to 4 players
-            joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+            Allocation allocation = await RelayService.Instance.CreateAllocationAsync(4);  // Max players
+
+            string joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
             Debug.Log($"Relay Join Code: {joinCode}");
 
-            // Set relay data
-            UnityTransport transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
-            transport.SetRelayServerData(
+            // Start hosting the game
+            NetworkManager.Singleton.GetComponent<Unity.Netcode.Transports.UTP.UnityTransport>().SetRelayServerData(
                 allocation.RelayServer.IpV4,
                 (ushort)allocation.RelayServer.Port,
                 allocation.AllocationIdBytes,
@@ -56,14 +53,13 @@ public class NetworkManagerHUD : MonoBehaviour
         }
     }
 
-    private async void StartClient()
+    public async void JoinRelay(string joinCode)
     {
         try
         {
             JoinAllocation joinAllocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
 
-            UnityTransport transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
-            transport.SetRelayServerData(
+            NetworkManager.Singleton.GetComponent<Unity.Netcode.Transports.UTP.UnityTransport>().SetRelayServerData(
                 joinAllocation.RelayServer.IpV4,
                 (ushort)joinAllocation.RelayServer.Port,
                 joinAllocation.AllocationIdBytes,
@@ -78,35 +74,5 @@ public class NetworkManagerHUD : MonoBehaviour
         {
             Debug.LogError($"Failed to join relay: {e.Message}");
         }
-    }
-
-    private void OnGUI()
-    {
-        GUILayout.BeginArea(new Rect(10, 10, 300, 200));
-
-        if (!NetworkManager.Singleton.IsClient && !NetworkManager.Singleton.IsServer)
-        {
-            if (GUILayout.Button("Host Game (Relay)"))
-            {
-                StartHost();
-            }
-
-            joinCode = GUILayout.TextField(joinCode, GUILayout.Width(200));
-
-            if (GUILayout.Button("Join Game (Relay)"))
-            {
-                StartClient();
-            }
-        }
-        else
-        {
-            if (GUILayout.Button("Disconnect"))
-            {
-                NetworkManager.Singleton.Shutdown();
-            }
-        }
-
-        GUILayout.Label($"Join Code: {joinCode}");
-        GUILayout.EndArea();
     }
 }

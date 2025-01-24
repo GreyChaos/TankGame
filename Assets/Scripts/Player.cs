@@ -11,9 +11,14 @@ public class Player : NetworkBehaviour
     Rigidbody2D rb;
     public LayerMask collisionLayer;
     private int hitCount = 0;
+    public NetworkVariable<Color> playerColor = new();
 
     void Start(){
         rb = GetComponent<Rigidbody2D>();
+        playerColor.OnValueChanged += (oldColor, newColor) =>
+        {
+            GetComponent<SpriteRenderer>().color = newColor;
+        };
     }
 
     void Update()
@@ -117,5 +122,22 @@ public class Player : NetworkBehaviour
         if(!IsOwner){
             animator.SetTrigger(trigger);
         }
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsServer)
+        {
+            // Only the server assigns the player's color
+            playerColor.Value = new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
+        }
+
+        // Apply the color immediately for the host
+        ApplyColor(playerColor.Value);
+    }
+
+    private void ApplyColor(Color color)
+    {
+        GetComponent<SpriteRenderer>().color = color;
     }
 }
