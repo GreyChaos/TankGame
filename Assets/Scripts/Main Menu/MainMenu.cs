@@ -35,7 +35,10 @@ public class MainMenu : MonoBehaviour
 
     public void SubmitCode(){
         joinCode = PlayerInput.text;
+        PlayerPrefs.SetString("JoinCode", joinCode);
         SceneManager.sceneLoaded += OnGameSceneLoadedClient;
+        JoinGameLayer.SetActive(false);
+        BaseLayer.SetActive(true);
         SceneManager.LoadScene("GameScene");
     }
 
@@ -68,7 +71,7 @@ public class MainMenu : MonoBehaviour
             NetworkManagerHUD networkManagerHUD = GameObject.FindAnyObjectByType<NetworkManagerHUD>();
             if (networkManagerHUD != null)
             {
-                networkManagerHUD.StartClient(joinCode);  // Call the host game method
+                networkManagerHUD.StartClient();  // Call the host game method
             }
         }
 

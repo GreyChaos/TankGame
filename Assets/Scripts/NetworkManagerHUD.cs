@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using UnityEngine.SceneManagement;
 using System;
 using TMPro;
+using System.Linq;
 
 public class NetworkManagerHUD : MonoBehaviour
 {
@@ -56,13 +57,14 @@ public class NetworkManagerHUD : MonoBehaviour
         }
     }
 
-    public async void StartClient(String code)
+    public async void StartClient()
     {
-        joinCode = code;
-        joinCodeText.SetText("Join Code: " + joinCode);
         await InitializeUnityServices();
         try
         {
+            joinCode = PlayerPrefs.GetString("JoinCode");
+            joinCode = new string(joinCode.Where(c => "6789BCDFGHJKLMNPQRTWbcdfghjklmnpqrtw".Contains(c)).ToArray());
+            joinCodeText.SetText("Join Code: " + joinCode);
             JoinAllocation joinAllocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
 
             UnityTransport transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
