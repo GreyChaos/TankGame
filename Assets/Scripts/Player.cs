@@ -1,5 +1,6 @@
 using System;
 using Unity.Netcode;
+using UnityEditor.PackageManager;
 using UnityEngine;
 
 public class Player : NetworkBehaviour
@@ -10,10 +11,13 @@ public class Player : NetworkBehaviour
     public GameObject shell;
     Rigidbody2D rb;
     public LayerMask collisionLayer;
-    private int hitCount = 0;
+    public int hitCount = 0;
     public NetworkVariable<Color> playerColor = new();
+    ulong myClientId = NetworkManager.Singleton.LocalClientId;
+    public NetworkVariable<Vector3> playerScale;
 
     void Start(){
+        playerScale.Value = transform.localScale;
         rb = GetComponent<Rigidbody2D>();
         playerColor.OnValueChanged += (oldColor, newColor) =>
         {
@@ -23,6 +27,10 @@ public class Player : NetworkBehaviour
 
     void Update()
     {
+        if (playerScale.Value != transform.localScale)
+        {
+            transform.localScale = playerScale.Value;
+        }
         if (IsOwner)
         {
             float moveY = Input.GetAxis("Vertical") * speed * Time.deltaTime;
@@ -53,20 +61,31 @@ public class Player : NetworkBehaviour
             }
         }
     }
-    public void IncrementHitCount(int damage)
+    public void IncrementHitCount(int damage, ulong shellOwner)
     {
         hitCount += damage;
         if (hitCount >= 3)
         {
-            DestroyPlayer();
+            hitCount = 0;
+            
+            UpdatePlayerSizesServerRpc(shellOwner);
         }
     }
 
-    private void DestroyPlayer()
-    {
-        hitCount = 0;
-        transform.localScale -= new Vector3(0.1f, 0.1f, 0f);
+    [ServerRpc(RequireOwnership=false)]
+    public void UpdatePlayerSizesServerRpc(ulong shellOwner){
+        playerScale.Value -= new Vector3(0.1f, 0.1f, 0f);
+        NetworkManager.ConnectedClients[shellOwner].PlayerObject.GetComponent<Player>().playerScale.Value += new Vector3(0.1f, 0.1f, 0f);
+        SyncPlayerSizesClientRpc(shellOwner);
     }
+
+    [ClientRpc]
+    public void SyncPlayerSizesClientRpc(ulong shellOwner){
+        if(IsOwner) return;
+        playerScale.Value -= new Vector3(0.1f, 0.1f, 0f);
+        NetworkManager.ConnectedClients[shellOwner].PlayerObject.GetComponent<Player>().playerScale.Value += new Vector3(0.1f, 0.1f, 0f);
+    }
+
 
     bool CanMove(float direction){
         Vector2 newPosition;
@@ -82,17 +101,16 @@ public class Player : NetworkBehaviour
     void FireShell(){
         // move shell x + 1
         Vector3 spawnPosition = transform.position + transform.up * 1f;
-        FireShellServerRpc(spawnPosition, transform.rotation);
+        FireShellServerRpc(spawnPosition, transform.rotation, myClientId);
     }
 
     [ServerRpc]
-    void FireShellServerRpc(Vector3 position, Quaternion rotation)
+    void FireShellServerRpc(Vector3 position, Quaternion rotation, ulong spawnPlayerID)
     {
         // Instantiate the shell at the given position and rotation on the server
         GameObject newShell = Instantiate(shell, position, rotation);
-
-        // Spawn the shell object on all clients via NetworkObject
-        newShell.GetComponent<NetworkObject>().Spawn();
+        // Spawns shell with clientID
+        newShell.GetComponent<NetworkObject>().SpawnWithOwnership(spawnPlayerID);
     }
 
     [ServerRpc]

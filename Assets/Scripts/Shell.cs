@@ -6,42 +6,41 @@ public class Shell : NetworkBehaviour
     public float speed = 5f;
     public int damage = 1;
     public LayerMask collisionLayer;
+    public NetworkVariable<Color> shellColor = new();
+    private bool isMarkedForDespawn = false;
+
+    public override void OnNetworkSpawn(){
+        if (IsServer)
+        {
+            // The Server sets the color
+            shellColor.Value = NetworkManager.Singleton
+            .ConnectedClients[OwnerClientId]
+            .PlayerObject.GetComponent<Player>()
+            .playerColor.Value;
+        }
+        // Clients get the color.
+        GetComponent<SpriteRenderer>().color = shellColor.Value;
+    }
 
     void Update()
     {
-        if (IsOwner)
-        {
-            transform.Translate(new Vector3(0, speed * Time.deltaTime, 0));
-            SubmitPositionRequestServerRpc(transform.position);
-        }
-
+        if (!IsOwner) return;
+        if(isMarkedForDespawn) return;
+        transform.Translate(new Vector3(0, speed * Time.deltaTime, 0));
+        SubmitPositionRequestServerRpc(transform.position);
         Collider2D hitCollider = Physics2D.OverlapCircle(transform.position, 0.02f, collisionLayer);
         if (hitCollider != null)
         {
             if (hitCollider.CompareTag("Player"))
             {
                 Player player = hitCollider.GetComponent<Player>();
-                player.IncrementHitCount(damage);
+                player.IncrementHitCount(damage, OwnerClientId);
             }
-
+            isMarkedForDespawn = true;
             RequestDespawn();
         }
     }
 
-    void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            Player player = collision.gameObject.GetComponent<Player>();
-            if (player != null)
-            {
-                Debug.Log("Player hit");
-                player.IncrementHitCount(damage);
-            }
-
-            RequestDespawn();
-        }
-    }
 
     void RequestDespawn()
     {
@@ -55,7 +54,7 @@ public class Shell : NetworkBehaviour
         }
     }
 
-    [ServerRpc(RequireOwnership = false)]
+    [ServerRpc]
     void SubmitDespawnRequestServerRpc()
     {
         GetComponent<NetworkObject>().Despawn();
