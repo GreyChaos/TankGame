@@ -1,10 +1,15 @@
 using System;
+using System.Collections;
+using Unity.Entities.UniversalDelegates;
 using Unity.Netcode;
 using UnityEngine;
 
 public class Player : NetworkBehaviour
 {
-    public float speed = 5f;
+    public float moveSpeed = 5f;
+    public float shootSpeed = .5f;
+    int shotsPerFire = 1;
+    bool canFire = true;
     public float rotationSpeed = 100f;
     public Animator animator;
     public GameObject shell;
@@ -16,6 +21,7 @@ public class Player : NetworkBehaviour
     public NetworkVariable<Color> playerColor = new();
     ulong myClientId;
     public NetworkVariable<Vector3> playerScale = new();
+    public bool powerupActive = false;
 
     void Start(){
         myClientId = NetworkManager.Singleton.LocalClientId;
@@ -34,7 +40,7 @@ public class Player : NetworkBehaviour
         }
         if (IsOwner)
         {
-            float moveY = Input.GetAxis("Vertical") * speed * Time.deltaTime;
+            float moveY = Input.GetAxis("Vertical") * moveSpeed * Time.deltaTime;
             float rotateInput = Input.GetAxis("Horizontal");
             float rotation = rotateInput * rotationSpeed * Time.deltaTime;
             
@@ -57,11 +63,34 @@ public class Player : NetworkBehaviour
                 SumbitAnimationTriggerServerRpc("Idle");
             }
             
-            if(Input.GetKeyDown(KeyCode.Space)){
+            if(Input.GetKeyDown(KeyCode.Space) && canFire){
                 FireShell();
             }
         }
     }
+
+
+    float tempShootSpeed;
+    float tempMoveSpeed;
+    int tempShotsPerFire;
+    public void PickupPowerup(Powerup powerup){
+        tempShootSpeed = shootSpeed;
+        tempMoveSpeed = moveSpeed;
+        tempShotsPerFire = shotsPerFire;
+
+        shootSpeed = powerup.shootSpeedChange * shootSpeed;
+        moveSpeed = powerup.moveSpeedChange * moveSpeed;
+        shotsPerFire = powerup.shotsPerShoot;
+
+        StopCoroutine(FireShellTimer(shootSpeed));
+    }
+
+    public void ResetPowerup(){
+        shootSpeed = tempShootSpeed;
+        moveSpeed = tempMoveSpeed;
+        shotsPerFire = tempShotsPerFire;
+    }
+
     public void IncrementHitCount(int damage, ulong shellOwner)
     {
         hitCount += damage;
@@ -99,9 +128,17 @@ public class Player : NetworkBehaviour
     }
 
     void FireShell(){
+        canFire = false;
+        StartCoroutine(FireShellTimer(shootSpeed));
         // move shell x + 1
         Vector3 spawnPosition = transform.position + transform.up * playerScale.Value.x;
         FireShellServerRpc(spawnPosition, transform.rotation, myClientId);
+    }
+
+    private IEnumerator FireShellTimer(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        canFire = true;
     }
 
     [ServerRpc]
