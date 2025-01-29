@@ -74,16 +74,18 @@ public class Player : NetworkBehaviour
 
     [ServerRpc(RequireOwnership=false)]
     public void UpdatePlayerSizesServerRpc(ulong shellOwner){
-        playerScale.Value -= new Vector3(0.1f, 0.1f, 0f);
-        NetworkManager.ConnectedClients[shellOwner].PlayerObject.GetComponent<Player>().playerScale.Value += new Vector3(0.1f, 0.1f, 0f);
+        if(playerScale.Value.x > .5){
+            playerScale.Value -= new Vector3(0.1f, 0.1f, 0f);
+            NetworkManager.ConnectedClients[shellOwner].PlayerObject.GetComponent<Player>().playerScale.Value += new Vector3(0.1f, 0.1f, 0f);
+        }
     }
 
     bool CanMove(float direction){
         Vector2 newPosition;
         if(direction > 0){
-            newPosition = transform.position + transform.up * 1f;
+            newPosition = transform.position + transform.up * playerScale.Value.x;
         }else{
-            newPosition = transform.position - transform.up * 1f;
+            newPosition = transform.position - transform.up * playerScale.Value.x;
         }
         // OverlapCircle checks if there's any collider within a radius of the new position
         return !Physics2D.OverlapCircle(newPosition, .05f, collisionLayer);
@@ -91,7 +93,7 @@ public class Player : NetworkBehaviour
 
     void FireShell(){
         // move shell x + 1
-        Vector3 spawnPosition = transform.position + transform.up * 1f;
+        Vector3 spawnPosition = transform.position + transform.up * playerScale.Value.x;
         FireShellServerRpc(spawnPosition, transform.rotation, myClientId);
     }
 

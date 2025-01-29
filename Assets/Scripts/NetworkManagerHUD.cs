@@ -85,4 +85,8 @@ public class NetworkManagerHUD : MonoBehaviour
         }
     }
 
+    public void copyText(){
+        GUIUtility.systemCopyBuffer = joinCode;
+    }
+
 }
