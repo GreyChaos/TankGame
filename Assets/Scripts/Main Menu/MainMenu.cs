@@ -9,6 +9,7 @@ public class MainMenu : MonoBehaviour
     public GameObject JoinGameLayer;
     String joinCode = "";
     public TextMeshProUGUI PlayerInput;
+    public String sceneName = "Level 2";
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -24,7 +25,7 @@ public class MainMenu : MonoBehaviour
 
     public void HostGame(){
         SceneManager.sceneLoaded += OnGameSceneLoadedHost;
-        SceneManager.LoadScene("GameScene");
+        SceneManager.LoadScene(sceneName);
     }
 
     public void JoinGame(){
@@ -39,7 +40,7 @@ public class MainMenu : MonoBehaviour
         SceneManager.sceneLoaded += OnGameSceneLoadedClient;
         JoinGameLayer.SetActive(false);
         BaseLayer.SetActive(true);
-        SceneManager.LoadScene("GameScene");
+        SceneManager.LoadScene(sceneName);
     }
 
     public void Settings(){
@@ -52,7 +53,7 @@ public class MainMenu : MonoBehaviour
 
     private void OnGameSceneLoadedHost(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name == "GameScene")
+        if (scene.name == sceneName)
         {
             NetworkManagerHUD networkManagerHUD = GameObject.FindAnyObjectByType<NetworkManagerHUD>();
             if (networkManagerHUD != null)
@@ -66,7 +67,7 @@ public class MainMenu : MonoBehaviour
 
     private void OnGameSceneLoadedClient(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name == "GameScene")
+        if (scene.name == sceneName)
         {
             NetworkManagerHUD networkManagerHUD = GameObject.FindAnyObjectByType<NetworkManagerHUD>();
             if (networkManagerHUD != null)

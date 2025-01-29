@@ -1,6 +1,5 @@
 using System;
 using Unity.Netcode;
-using UnityEditor.PackageManager;
 using UnityEngine;
 
 public class Player : NetworkBehaviour
@@ -13,10 +12,11 @@ public class Player : NetworkBehaviour
     public LayerMask collisionLayer;
     public int hitCount = 0;
     public NetworkVariable<Color> playerColor = new();
-    ulong myClientId = NetworkManager.Singleton.LocalClientId;
+    ulong myClientId;
     public NetworkVariable<Vector3> playerScale;
 
     void Start(){
+        myClientId = NetworkManager.Singleton.LocalClientId;
         playerScale.Value = transform.localScale;
         rb = GetComponent<Rigidbody2D>();
         playerColor.OnValueChanged += (oldColor, newColor) =>
