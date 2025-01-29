@@ -135,6 +135,7 @@ MonoBehaviour:
   animator: {fileID: 1679186533697406455}
   shell: {fileID: 2903629423322623434, guid: c8f6d29c95580c846a97263fa515653b, type: 3}
   shotFiredParticle: {fileID: 4724744885229086956, guid: 3bf105ac1009c8b48b38912082958f47, type: 3}
+  shotHitParticle: {fileID: 4724744885229086956, guid: 6975ed43a63da08458f830382283e0bf, type: 3}
   collisionLayer:
     serializedVersion: 2
     m_Bits: 8

@@ -9,6 +9,7 @@ public class Player : NetworkBehaviour
     public Animator animator;
     public GameObject shell;
     public GameObject shotFiredParticle;
+    public GameObject shotHitParticle;
     Rigidbody2D rb;
     public LayerMask collisionLayer;
     public int hitCount = 0;
@@ -64,12 +65,18 @@ public class Player : NetworkBehaviour
     public void IncrementHitCount(int damage, ulong shellOwner)
     {
         hitCount += damage;
+        PlayerHitParticleServerRpc(transform.position, transform.rotation, myClientId);
         if (hitCount >= 3)
         {
             hitCount = 0;
-            
-            UpdatePlayerSizesServerRpc(shellOwner);
+            UpdatePlayerSizesServerRpc(shellOwner);   
         }
+    }
+
+    [ServerRpc(RequireOwnership=false)]
+    void PlayerHitParticleServerRpc(Vector3 position, Quaternion rotation, ulong spawnPlayerID){
+        GameObject newShotFiredParticle = Instantiate(shotHitParticle, position, rotation);
+        newShotFiredParticle.GetComponent<NetworkObject>().SpawnWithOwnership(spawnPlayerID);
     }
 
     [ServerRpc(RequireOwnership=false)]
