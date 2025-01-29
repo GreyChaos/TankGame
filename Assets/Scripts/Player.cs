@@ -8,16 +8,16 @@ public class Player : NetworkBehaviour
     public float rotationSpeed = 100f;
     public Animator animator;
     public GameObject shell;
+    public GameObject shotFiredParticle;
     Rigidbody2D rb;
     public LayerMask collisionLayer;
     public int hitCount = 0;
     public NetworkVariable<Color> playerColor = new();
     ulong myClientId;
-    public NetworkVariable<Vector3> playerScale;
+    public NetworkVariable<Vector3> playerScale = new();
 
     void Start(){
         myClientId = NetworkManager.Singleton.LocalClientId;
-        playerScale.Value = transform.localScale;
         rb = GetComponent<Rigidbody2D>();
         playerColor.OnValueChanged += (oldColor, newColor) =>
         {
@@ -76,16 +76,7 @@ public class Player : NetworkBehaviour
     public void UpdatePlayerSizesServerRpc(ulong shellOwner){
         playerScale.Value -= new Vector3(0.1f, 0.1f, 0f);
         NetworkManager.ConnectedClients[shellOwner].PlayerObject.GetComponent<Player>().playerScale.Value += new Vector3(0.1f, 0.1f, 0f);
-        SyncPlayerSizesClientRpc(shellOwner);
     }
-
-    [ClientRpc]
-    public void SyncPlayerSizesClientRpc(ulong shellOwner){
-        if(IsOwner) return;
-        playerScale.Value -= new Vector3(0.1f, 0.1f, 0f);
-        NetworkManager.ConnectedClients[shellOwner].PlayerObject.GetComponent<Player>().playerScale.Value += new Vector3(0.1f, 0.1f, 0f);
-    }
-
 
     bool CanMove(float direction){
         Vector2 newPosition;
@@ -111,6 +102,10 @@ public class Player : NetworkBehaviour
         GameObject newShell = Instantiate(shell, position, rotation);
         // Spawns shell with clientID
         newShell.GetComponent<NetworkObject>().SpawnWithOwnership(spawnPlayerID);
+
+        // Instantiate the shotFiredParticle at the given position and rotation on the server
+        GameObject newShotFiredParticle = Instantiate(shotFiredParticle, position, rotation);
+        newShotFiredParticle.GetComponent<NetworkObject>().SpawnWithOwnership(spawnPlayerID);
     }
 
     [ServerRpc]

@@ -134,11 +134,15 @@ MonoBehaviour:
   rotationSpeed: 130
   animator: {fileID: 1679186533697406455}
   shell: {fileID: 2903629423322623434, guid: c8f6d29c95580c846a97263fa515653b, type: 3}
+  shotFiredParticle: {fileID: 4724744885229086956, guid: 3bf105ac1009c8b48b38912082958f47, type: 3}
   collisionLayer:
     serializedVersion: 2
     m_Bits: 8
+  hitCount: 0
   playerColor:
     m_InternalValue: {r: 0, g: 0, b: 0, a: 0}
+  playerScale:
+    m_InternalValue: {x: 0, y: 0, z: 0}
 --- !u!95 &1679186533697406455
 Animator:
   serializedVersion: 7

@@ -19,6 +19,7 @@ public class PlayerSpawner : NetworkBehaviour
         // Instantiate the player on the server
         GameObject player = Instantiate(playerPrefab, GetSpawnPosition(), Quaternion.identity);
         player.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
+        player.GetComponent<Player>().playerScale.Value = player.transform.localScale;
     }
 
     private Vector3 GetSpawnPosition()
