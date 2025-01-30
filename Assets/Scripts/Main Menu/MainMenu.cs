@@ -7,20 +7,31 @@ public class MainMenu : MonoBehaviour
 {
     public GameObject BaseLayer;
     public GameObject JoinGameLayer;
+    public GameObject HostingGameLayer;
     String joinCode = "";
     public TextMeshProUGUI PlayerInput;
-    public String sceneName = "Level 2";
+    public String sceneName = "GameScene";
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         JoinGameLayer.SetActive(false);
+        HostingGameLayer.SetActive(false);
     }
 
     // Update is called once per frame
     void Update()
     {
         
+    }
+
+    public void SwitchLevel(String sceneName){
+        this.sceneName = sceneName;
+    }
+
+    public void StartHostGame(){
+        BaseLayer.SetActive(false);
+        HostingGameLayer.SetActive(true);
     }
 
     public void HostGame(){

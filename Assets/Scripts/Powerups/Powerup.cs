@@ -33,14 +33,17 @@ public class Powerup : NetworkBehaviour
 
 
     void PickedUpByPlayer(){
-        if(inUse) return;
+        if(inUse){
+            gameObject.GetComponent<SpriteRenderer>().sortingOrder = -5;
+            return;
+        }
         inUse = true;
         if(player.GetComponent<Player>().powerupActive){
             return;
         }
         player.GetComponent<Player>().powerupActive = true;
         player.GetComponent<Player>().PickupPowerup(this);
-        gameObject.GetComponent<SpriteRenderer>().sortingOrder = -1;
+        gameObject.GetComponent<SpriteRenderer>().sortingOrder = -5;
         StartCoroutine(DestroyAfterDelay(effectDuration));
     }
 

@@ -21,6 +21,8 @@ public class Player : NetworkBehaviour
     ulong myClientId;
     public NetworkVariable<Vector3> playerScale = new();
     public bool powerupActive = false;
+    Vector3 lastSyncedPosition = new(1,1,1);
+    Quaternion lastSyncedRotation = new(1f,1f,1f,1f);
 
     void Start(){
         myClientId = NetworkManager.Singleton.LocalClientId;
@@ -50,7 +52,13 @@ public class Player : NetworkBehaviour
             }else{
                 transform.Rotate(0, 0, -rotation);
             }
-            SubmitPositionRequestServerRpc(transform.position, transform.rotation);
+            if (Vector3.Distance(transform.position, lastSyncedPosition) > 0.05f ||
+                Quaternion.Angle(transform.rotation, lastSyncedRotation) > 2f)
+            {
+                lastSyncedPosition = transform.position;
+                lastSyncedRotation = transform.rotation;
+                SubmitPositionRequestServerRpc(transform.position, transform.rotation);
+            }
             if (moveY > 0){
                 animator.SetTrigger("MoveForward");
                 SumbitAnimationTriggerServerRpc("MoveForward");

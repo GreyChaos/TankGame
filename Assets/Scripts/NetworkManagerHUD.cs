@@ -16,6 +16,10 @@ public class NetworkManagerHUD : MonoBehaviour
     public TextMeshProUGUI joinCodeText;
     private string joinCode = "";  // Holds the relay join code for clients to enter
 
+    void Start(){
+        joinCodeText.SetText("Join Code: " + PlayerPrefs.GetString("JoinCode"));
+    }
+
     private async Task InitializeUnityServices()
     {
         if (UnityServices.State == ServicesInitializationState.Initialized)
@@ -64,7 +68,6 @@ public class NetworkManagerHUD : MonoBehaviour
         {
             joinCode = PlayerPrefs.GetString("JoinCode");
             joinCode = new string(joinCode.Where(c => "6789BCDFGHJKLMNPQRTWbcdfghjklmnpqrtw".Contains(c)).ToArray());
-            joinCodeText.SetText("Join Code: " + joinCode);
             JoinAllocation joinAllocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
 
             UnityTransport transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
@@ -78,6 +81,7 @@ public class NetworkManagerHUD : MonoBehaviour
             );
 
             NetworkManager.Singleton.StartClient();
+            joinCodeText.SetText("Join Code: " + PlayerPrefs.GetString("JoinCode"));
         }
         catch (RelayServiceException e)
         {
@@ -88,5 +92,14 @@ public class NetworkManagerHUD : MonoBehaviour
     public void copyText(){
         GUIUtility.systemCopyBuffer = joinCode;
     }
+
+    void OnDestroy()
+    {
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.Shutdown();
+        }
+    }
+
 
 }
