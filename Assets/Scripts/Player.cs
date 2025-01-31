@@ -168,12 +168,6 @@ public class Player : NetworkBehaviour
         SyncPositionClientRpc(position, rotation); // Update position for clients
     }
 
-    [ServerRpc]
-    void SumbitAnimationTriggerServerRpc(String trigger){
-        animator.SetTrigger(trigger);
-        SyncAnimationTriggerClientRpc(trigger);
-    }
-
     [ClientRpc]
     void SyncPositionClientRpc(Vector3 position, Quaternion rotation)
     {
@@ -181,6 +175,13 @@ public class Player : NetworkBehaviour
         {
             transform.SetPositionAndRotation(position, rotation);
         }
+    }
+
+    
+    [ServerRpc]
+    void SumbitAnimationTriggerServerRpc(String trigger){
+        animator.SetTrigger(trigger);
+        SyncAnimationTriggerClientRpc(trigger);
     }
 
     [ClientRpc]

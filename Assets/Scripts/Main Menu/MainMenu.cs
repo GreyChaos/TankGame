@@ -10,7 +10,7 @@ public class MainMenu : MonoBehaviour
     public GameObject HostingGameLayer;
     String joinCode = "";
     public TextMeshProUGUI PlayerInput;
-    public String sceneName = "GameScene";
+    public String sceneName = "Level 1";
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()

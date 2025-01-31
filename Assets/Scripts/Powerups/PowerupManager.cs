@@ -55,6 +55,9 @@ public class PowerupManager : NetworkBehaviour
     void SpawnPowerupServerRpc(Vector3 position, Quaternion rotation, int spawnSpotIndex){
         // Instantiate the shell at the given position and rotation on the server
         GameObject newPowerup = Instantiate(powerups[Random.Range(0, powerups.Count)].gameObject, position, rotation);
+        if(newPowerup.GetComponent<Powerup>() == null){
+            return;
+        }
         newPowerup.GetComponent<Powerup>().spawnSpot = powerupSpawnPoints[spawnSpotIndex];
         // Spawns shell with clientID
         newPowerup.GetComponent<NetworkObject>().Spawn();

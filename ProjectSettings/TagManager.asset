@@ -6,6 +6,7 @@ TagManager:
   tags:
   - PowerupSpawn
   - Powerup
+  - ObstacleSpawnpoint
   layers:
   - Default
   - TransparentFX
