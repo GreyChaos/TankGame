@@ -88,7 +88,7 @@ public class Sandpit : NetworkBehaviour
 
     void CheckForPlayers() {
     // Get all colliders within the circle
-    Collider2D[] playersInArea = Physics2D.OverlapCircleAll(transform.position, gameObject.transform.localScale.x, collisionLayer);
+    Collider2D[] playersInArea = Physics2D.OverlapCircleAll(transform.position, gameObject.transform.localScale.x * 1.1f, collisionLayer);
 
     // Iterate through all colliders
     foreach (Collider2D playerCollider in playersInArea) {

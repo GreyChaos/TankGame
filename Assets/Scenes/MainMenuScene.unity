@@ -3809,7 +3809,7 @@ MonoBehaviour:
   JoinGameLayer: {fileID: 1940202801}
   HostingGameLayer: {fileID: 222412803}
   PlayerInput: {fileID: 74440043}
-  sceneName: Level 1
+  sceneName: LoadingScene
 --- !u!4 &1882641410
 Transform:
   m_ObjectHideFlags: 0
