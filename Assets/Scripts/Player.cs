@@ -71,7 +71,7 @@ public class Player : NetworkBehaviour
                 SumbitAnimationTriggerServerRpc("Idle");
             }
             
-            if(Input.GetKeyDown(KeyCode.Space) && canFire){
+            if(Input.GetButtonDown("Fire1") && canFire){
                 FireShell();
             }
         }

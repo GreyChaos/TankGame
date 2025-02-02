@@ -36,10 +36,10 @@ public class Powerup : NetworkBehaviour
         if(inUse){
             return;
         }
-        inUse = true;
         if(player.GetComponent<Player>().powerupActive){
             return;
         }
+        inUse = true;
         PlayPickUpSoundClientRpc(player.GetComponent<Player>().myClientId, "powerUp");
         player.GetComponent<Player>().powerupActive = true;
         player.GetComponent<Player>().PickupPowerup(this);
