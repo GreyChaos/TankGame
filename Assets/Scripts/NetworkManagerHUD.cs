@@ -40,9 +40,17 @@ public class NetworkManagerHUD : MonoBehaviour
         try
         {
             Allocation allocation = await RelayService.Instance.CreateAllocationAsync(4);  // Up to 4 players
+            if(allocation == null){
+                Debug.Log("Allocation failed");
+            }
             joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+            if(joinCode == null){
+                Debug.Log("Joincode failed");
+            }
+            if(joinCodeText == null){
+                Debug.Log("Join code text is null?");
+            }
             joinCodeText.SetText("Join Code: " + joinCode);
-
             // Set relay data
             UnityTransport transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
             transport.SetRelayServerData(

@@ -2,27 +2,50 @@ using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class MainMenu : MonoBehaviour
 {
     public GameObject BaseLayer;
     public GameObject JoinGameLayer;
     public GameObject HostingGameLayer;
+    public GameObject SettingLayer;
+
     String joinCode = "";
     public TextMeshProUGUI PlayerInput;
     public String sceneName = "Level 1";
+    public Slider musicSlider;
+    public Slider soundSlider;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         JoinGameLayer.SetActive(false);
         HostingGameLayer.SetActive(false);
+        SettingLayer.SetActive(false);
+        if(!PlayerPrefs.HasKey("MusicVolume")){
+            Debug.Log("No key found, generating defaults");
+            PlayerPrefs.SetFloat("MusicVolume", 1f);
+            PlayerPrefs.SetFloat("EffectVolume", 1f);
+        }else{
+            musicSlider.value = PlayerPrefs.GetFloat("MusicVolume");
+            soundSlider.value = PlayerPrefs.GetFloat("EffectVolume");
+        }
+
+        musicSlider.onValueChanged.AddListener((value) => UpdateSoundLevels());
+        soundSlider.onValueChanged.AddListener((value) => UpdateSoundLevels());
     }
 
     // Update is called once per frame
     void Update()
     {
         
+    }
+
+    public void UpdateSoundLevels(){
+        PlayerPrefs.SetFloat("MusicVolume", musicSlider.value);
+        PlayerPrefs.SetFloat("EffectVolume", soundSlider.value);
+        PlayerPrefs.Save();
     }
 
     public void SwitchLevel(String sceneName){
@@ -40,9 +63,13 @@ public class MainMenu : MonoBehaviour
     }
 
     public void JoinGame(){
-        JoinGameLayer.SetActive(true);
-        BaseLayer.SetActive(false);
-        
+        if(JoinGameLayer.activeSelf){
+            JoinGameLayer.SetActive(false);
+            BaseLayer.SetActive(true);
+        }else{
+            JoinGameLayer.SetActive(true);
+            BaseLayer.SetActive(false);
+        }
     }
 
     public void SubmitCode(){
@@ -55,7 +82,13 @@ public class MainMenu : MonoBehaviour
     }
 
     public void Settings(){
-        Debug.Log("Setting");
+        if(SettingLayer.activeSelf){
+            SettingLayer.SetActive(false);
+            BaseLayer.SetActive(true);
+        }else{
+            SettingLayer.SetActive(true);
+            BaseLayer.SetActive(false);
+        }    
     }
 
     public void ExitGame(){

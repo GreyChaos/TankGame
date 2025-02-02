@@ -13,22 +13,18 @@ public class UIManager : MonoBehaviour
 
     // Update is called once per frame
     void Update()
-{
-    if (Input.GetKeyDown(KeyCode.Escape))
     {
-        DisconnectAndReturnToMainMenu();
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            DisconnectAndReturnToMainMenu();
+        }
     }
-}
 
     private void DisconnectAndReturnToMainMenu()
     {
-        if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
-        {
-            // Clean up the network session
-            NetworkManager.Singleton.Shutdown();
-        }
-
-        // Wait a frame before loading the scene to ensure shutdown completes
+        NetworkManager.Singleton.Shutdown();
+        Destroy(NetworkManager.Singleton.gameObject);
+        // Wait a frme before loading the scene to ensure shutdown completes
         StartCoroutine(LoadMainMenuScene());
     }
 
