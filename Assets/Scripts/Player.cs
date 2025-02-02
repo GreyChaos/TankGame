@@ -18,11 +18,12 @@ public class Player : NetworkBehaviour
     public LayerMask collisionLayer;
     public int hitCount = 0;
     public NetworkVariable<Color> playerColor = new();
-    ulong myClientId;
+    public ulong myClientId;
     public NetworkVariable<Vector3> playerScale = new();
     public bool powerupActive = false;
     Vector3 lastSyncedPosition = new(1,1,1);
     Quaternion lastSyncedRotation = new(1f,1f,1f,1f);
+
 
     void Start(){
         myClientId = NetworkManager.Singleton.LocalClientId;
@@ -111,6 +112,7 @@ public class Player : NetworkBehaviour
 
     [ServerRpc(RequireOwnership=false)]
     void PlayerHitParticleServerRpc(Vector3 position, Quaternion rotation, ulong spawnPlayerID){
+        PlayGlobalSoundServerRpc("hitHurt");
         GameObject newShotFiredParticle = Instantiate(shotHitParticle, position, rotation);
         newShotFiredParticle.GetComponent<NetworkObject>().SpawnWithOwnership(spawnPlayerID);
     }
@@ -159,6 +161,7 @@ public class Player : NetworkBehaviour
         // Instantiate the shotFiredParticle at the given position and rotation on the server
         GameObject newShotFiredParticle = Instantiate(shotFiredParticle, position, rotation);
         newShotFiredParticle.GetComponent<NetworkObject>().SpawnWithOwnership(spawnPlayerID);
+        PlayGlobalSoundServerRpc("explosion");
     }
 
     [ServerRpc]
@@ -206,5 +209,18 @@ public class Player : NetworkBehaviour
     private void ApplyColor(Color color)
     {
         GetComponent<SpriteRenderer>().color = color;
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void PlayGlobalSoundServerRpc(string sound)
+    {
+        PlayGlobalSoundClientRpc(sound);
+    }
+
+    [ClientRpc]
+    void PlayGlobalSoundClientRpc(string sound)
+    {
+        AudioClip clip = AudioManager.Instance.GetAudioClipByName(sound);
+        AudioManager.Instance.PlaySound(clip);
     }
 }

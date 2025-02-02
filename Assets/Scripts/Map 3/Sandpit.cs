@@ -16,7 +16,6 @@ public class Sandpit : NetworkBehaviour
     GameObject[] spawningPoints; 
     public GameObject particles;
     public LayerMask collisionLayer;
-    Collider2D player = null;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()

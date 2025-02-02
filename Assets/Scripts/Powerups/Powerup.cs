@@ -41,6 +41,7 @@ public class Powerup : NetworkBehaviour
         if(player.GetComponent<Player>().powerupActive){
             return;
         }
+        PlayPickUpSoundClientRpc(player.GetComponent<Player>().myClientId, "powerUp");
         player.GetComponent<Player>().powerupActive = true;
         player.GetComponent<Player>().PickupPowerup(this);
         gameObject.GetComponent<SpriteRenderer>().sortingOrder = -5;
@@ -76,5 +77,18 @@ public class Powerup : NetworkBehaviour
     void SubmitDespawnRequestServerRpc()
     {
         GetComponent<NetworkObject>().Despawn();
+    }
+
+    [ClientRpc]
+    void PlayPickUpSoundClientRpc(ulong targetClientId, string soundName)
+    {
+        if (NetworkManager.Singleton.LocalClientId == targetClientId)
+        {
+            AudioClip clip = AudioManager.Instance.GetAudioClipByName(soundName);
+            if (clip != null)
+            {
+                AudioManager.Instance.PlaySound(clip);
+            }
+        }
     }
 }
