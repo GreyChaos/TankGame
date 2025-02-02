@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class Shell : NetworkBehaviour
 {
-    public float speed = 5f;
+    public float speed = 6f;
     public int damage = 1;
     public LayerMask collisionLayer;
     public NetworkVariable<Color> shellColor = new();

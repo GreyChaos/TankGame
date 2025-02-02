@@ -34,7 +34,6 @@ public class Powerup : NetworkBehaviour
 
     void PickedUpByPlayer(){
         if(inUse){
-            gameObject.GetComponent<SpriteRenderer>().sortingOrder = -5;
             return;
         }
         inUse = true;
